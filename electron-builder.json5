@@ -1,0 +1,25 @@
+// @see - https://www.electron.build/configuration/configuration
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.joaomjbraga.tocae-reprodutor",
+  "asar": true,
+  "productName": "Tocaê Reprodutor",
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": [
+    "dist",
+    "dist-electron"
+  ],
+  "linux": {
+    "target": [
+      "deb",
+      "rpm"
+    ],
+    "artifactName": "${productName}-${version}.${ext}",
+    "category": "AudioVideo",
+    "maintainer": "João M J Braga <joaomarcos.jbraga@gmail.com>",
+    "synopsis": "Reprodutor de vídeo minimalista",
+    "description": "Tocaê Reprodutor abre um vídeo e reproduz, com timeline, play/pause e tela cheia."
+  }
+}

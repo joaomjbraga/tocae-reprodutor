@@ -1,0 +1,59 @@
+.about {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background: transparent;
+}
+
+.wordmark {
+  height: 44px;
+  width: auto;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e8e8e8;
+  letter-spacing: 0.3px;
+}
+
+.description {
+  margin: 0;
+  font-size: 13px;
+  color: #a8a8a8;
+  max-width: 320px;
+}
+
+.info {
+  margin: 18px 0 0;
+  width: 100%;
+  max-width: 320px;
+  border-top: 1px solid #33333a;
+  font-size: 12px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #2a2a30;
+}
+
+.row dt {
+  color: #8a8a8a;
+}
+
+.row dd {
+  margin: 0;
+  color: #c9c9c9;
+  font-variant-numeric: tabular-nums;
+}
