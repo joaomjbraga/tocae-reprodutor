@@ -6,11 +6,13 @@ import {
   ICON_PATH,
   PRELOAD_PATH,
   RENDERER_DIST,
+  SHORTCUTS_TITLE,
   VITE_DEV_SERVER_URL,
 } from './paths'
 
 let mainWindow: BrowserWindow | null = null
 let aboutWindow: BrowserWindow | null = null
+let shortcutsWindow: BrowserWindow | null = null
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow
@@ -72,6 +74,38 @@ export function createAboutWindow(): void {
   aboutWindow.on('closed', () => { aboutWindow = null })
 
   loadRenderer(aboutWindow, { hash: 'about' })
+}
+
+export function createShortcutsWindow(): void {
+  if (shortcutsWindow) {
+    shortcutsWindow.focus()
+    return
+  }
+
+  shortcutsWindow = new BrowserWindow({
+    title: SHORTCUTS_TITLE,
+    width: 380,
+    height: 320,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    parent: mainWindow ?? undefined,
+    backgroundColor: '#101014',
+    show: false,
+    icon: ICON_PATH,
+    webPreferences: {
+      preload: PRELOAD_PATH,
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
+  })
+
+  shortcutsWindow.removeMenu()
+  shortcutsWindow.once('ready-to-show', () => shortcutsWindow?.show())
+  shortcutsWindow.on('closed', () => { shortcutsWindow = null })
+
+  loadRenderer(shortcutsWindow, { hash: 'shortcuts' })
 }
 
 export function focusMainWindow(): void {

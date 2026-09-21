@@ -1,0 +1,61 @@
+.shortcuts {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background: transparent;
+}
+
+.wordmark {
+  height: 44px;
+  width: auto;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e8e8e8;
+  letter-spacing: 0.3px;
+}
+
+.list {
+  margin: 18px 0 0;
+  padding: 0;
+  width: 100%;
+  max-width: 320px;
+  list-style: none;
+  border-top: 1px solid #33333a;
+  font-size: 13px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #2a2a30;
+}
+
+.key {
+  min-width: 56px;
+  padding: 3px 10px;
+  border: 1px solid #4a4a4a;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8e8e8;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.action {
+  color: #a8a8a8;
+}

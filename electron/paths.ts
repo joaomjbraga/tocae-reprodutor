@@ -20,4 +20,5 @@ export const PRELOAD_PATH = path.join(__dirname, 'preload.mjs')
 
 export const APP_TITLE = 'Tocaê Reprodutor'
 export const ABOUT_TITLE = 'Sobre o Tocaê'
+export const SHORTCUTS_TITLE = 'Atalhos'
 export const DESKTOP_FILE_NAME = 'tocae-reprodutor.desktop'

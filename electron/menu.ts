@@ -1,5 +1,5 @@
 import { Menu } from 'electron'
-import { createAboutWindow } from './windows'
+import { createAboutWindow, createShortcutsWindow } from './windows'
 import { openVideoDialog } from './dialogs'
 
 export function buildApplicationMenu(): void {
@@ -8,6 +8,10 @@ export function buildApplicationMenu(): void {
       label: 'Abrir',
       accelerator: 'CmdOrCtrl+O',
       click: () => void openVideoDialog(),
+    },
+    {
+      label: 'Atalhos',
+      click: () => createShortcutsWindow(),
     },
     {
       label: 'Sobre',

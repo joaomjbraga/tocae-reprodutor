@@ -101,6 +101,43 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+.volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.volumeSlider {
+  width: 80px;
+  height: 14px;
+  cursor: pointer;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.volumeSlider::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: #3a3a3a;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4.5px;
+  border: none;
+  border-radius: 50%;
+  background: #e8e8e8;
+  transition: transform 0.1s ease;
+}
+
+.volumeSlider:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+
 .time {
   font-size: 12px;
   font-variant-numeric: tabular-nums;

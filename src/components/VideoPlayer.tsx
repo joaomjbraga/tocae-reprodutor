@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, SyntheticEvent } from 'react'
-import { CompressIcon, ExpandIcon, PauseIcon, PlayIcon } from './icons'
+import {
+  CompressIcon,
+  ExpandIcon,
+  PauseIcon,
+  PlayIcon,
+  VolumeHighIcon,
+  VolumeLowIcon,
+  VolumeMuteIcon,
+} from './icons'
 import { formatTime } from '../lib/format'
 import { toMediaUrl } from '../lib/media'
 import wordmark from '../assets/tocae-wordmark.png'
@@ -18,6 +26,8 @@ function VideoPlayer() {
   const [duration, setDuration] = useState(0)
   const [seeking, setSeeking] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [volume, setVolume] = useState(1)
+  const [muted, setMuted] = useState(false)
 
   useEffect(() => {
     const area = areaRef.current
@@ -37,6 +47,32 @@ function VideoPlayer() {
     const api = window.tocae
     if (!api) return
     return api.onVideoOpen((filePath) => loadPath(filePath))
+  }, [])
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null
+      const isButton = target instanceof HTMLButtonElement || target instanceof HTMLAnchorElement
+      switch (event.key) {
+        case 'f':
+        case 'F':
+          event.preventDefault()
+          toggleFullscreen()
+          break
+        case 'm':
+        case 'M':
+          event.preventDefault()
+          toggleMute()
+          break
+        case ' ':
+          if (isButton) break
+          event.preventDefault()
+          togglePlay()
+          break
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   function loadFile(file: File | undefined) {
@@ -91,6 +127,39 @@ function VideoPlayer() {
     setCurrentTime(time)
   }
 
+  function handleVolumeChange(event: ChangeEvent<HTMLInputElement>) {
+    applyVolume(Number(event.target.value))
+  }
+
+  function applyVolume(value: number) {
+    const video = videoRef.current
+    if (!video) return
+    const clamped = Math.min(1, Math.max(0, value))
+    video.volume = clamped
+    if (clamped > 0 && video.muted) {
+      video.muted = false
+      setMuted(false)
+    }
+    setVolume(clamped)
+  }
+
+  function handleVolumeSync(event: SyntheticEvent<HTMLVideoElement>) {
+    setVolume(event.currentTarget.volume)
+    setMuted(event.currentTarget.muted)
+  }
+
+  function toggleMute() {
+    const video = videoRef.current
+    if (!video) return
+    video.muted = !video.muted
+  }
+
+  const volumeIcon = muted || volume === 0
+    ? <VolumeMuteIcon />
+    : volume < 0.5
+      ? <VolumeLowIcon />
+      : <VolumeHighIcon />
+
   function toggleFullscreen() {
     const area = areaRef.current
     if (!area) return
@@ -124,12 +193,14 @@ function VideoPlayer() {
             src={src ?? undefined}
             autoPlay
             controls={false}
+            muted={muted}
             onClick={togglePlay}
             onContextMenu={(event) => event.preventDefault()}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
             onEnded={() => setPlaying(false)}
             onTimeUpdate={handleTimeUpdate}
+            onVolumeChange={handleVolumeSync}
             onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
             onDurationChange={(event) => setDuration(event.currentTarget.duration)}
           />
@@ -167,6 +238,27 @@ function VideoPlayer() {
               aria-label="Linha do tempo do vídeo"
             />
             <span className={styles.time}>{formatTime(duration)}</span>
+            <div className={styles.volume}>
+              <button
+                type="button"
+                className={styles.controlButton}
+                onClick={toggleMute}
+                aria-label={muted ? 'Ativar som' : 'Silenciar'}
+                title={muted ? 'Ativar som' : 'Silenciar'}
+              >
+                {volumeIcon}
+              </button>
+              <input
+                type="range"
+                className={styles.volumeSlider}
+                min={0}
+                max={1}
+                step={0.01}
+                value={muted ? 0 : volume}
+                onChange={handleVolumeChange}
+                aria-label="Volume"
+              />
+            </div>
             <button
               type="button"
               className={styles.controlButton}
