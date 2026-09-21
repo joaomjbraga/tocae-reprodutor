@@ -11,4 +11,4 @@ Reprodutor de vídeo minimalista construído com Electron, React e TypeScript. A
 
 [![João M J Braga](https://github.com/joaomjbraga.png?size=100)](https://github.com/joaomjbraga)
 
-Se você gostou deste tema, considere deixar uma ⭐ no repositório!
+Se você gostou, considere deixar uma ⭐ no repositório!
