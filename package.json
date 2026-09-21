@@ -2,12 +2,14 @@
   "name": "tocae-reprodutor",
   "private": true,
   "version": "0.0.1",
-  "description": "Tocaê Reprodutor reprodutor de vídeo minimalista",
+  "description": "Reprodutor de vídeo minimalista",
   "author": "João M J Braga <joaomarcos.jbraga@gmail.com>",
+  "desktopName": "tocae-reprodutor",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {

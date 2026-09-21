@@ -1,11 +1,12 @@
 // @see - https://www.electron.build/configuration/configuration
 {
-  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "$schema": "https://json.schemastore.org/electron-builder.json",
   "appId": "com.joaomjbraga.tocae-reprodutor",
   "asar": true,
   "productName": "Tocaê Reprodutor",
   "directories": {
-    "output": "release/${version}"
+    "output": "release/${version}",
+    "buildResources": "build"
   },
   "files": [
     "dist",
@@ -13,10 +14,10 @@
   ],
   "linux": {
     "target": [
-      "deb",
       "rpm"
     ],
-    "artifactName": "${productName}-${version}.${ext}",
+    "icon": "build/icons",
+    "artifactName": "tocae-reprodutor-${version}.${ext}",
     "category": "AudioVideo",
     "maintainer": "João M J Braga <joaomarcos.jbraga@gmail.com>",
     "synopsis": "Reprodutor de vídeo minimalista",

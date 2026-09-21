@@ -1,4 +1,4 @@
-<img src="public/tocae-wordmark.png" alt="Tocaê Reprodutor" width="320" />
+<img src="src/assets/tocae-wordmark.png" alt="Tocaê Reprodutor" width="320" />
 
 # Tocaê Reprodutor
 

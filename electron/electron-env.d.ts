@@ -1,12 +1,9 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
-declare namespace NodeJS {
-  interface ProcessEnv {
-    APP_ROOT: string
-    VITE_PUBLIC: string
-  }
-}
+import type { TocaeApi } from '@shared/ipc'
 
-interface Window {
-  ipcRenderer: import('electron').IpcRenderer
+declare global {
+  interface Window {
+    tocae: TocaeApi
+  }
 }

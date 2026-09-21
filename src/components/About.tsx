@@ -1,4 +1,5 @@
 import styles from './About.module.css'
+import wordmark from '../assets/tocae-wordmark.png'
 import pkg from '../../package.json'
 
 const AUTHOR = String(pkg.author ?? '')
@@ -10,7 +11,7 @@ function About() {
     <div className={styles.about}>
       <img
         className={styles.wordmark}
-        src="/tocae-wordmark.png"
+        src={wordmark}
         alt="Tocaê Reprodutor"
         draggable={false}
       />

@@ -1,61 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, SyntheticEvent } from 'react'
+import { CompressIcon, ExpandIcon, PauseIcon, PlayIcon } from './icons'
+import { formatTime } from '../lib/format'
+import { toMediaUrl } from '../lib/media'
+import wordmark from '../assets/tocae-wordmark.png'
 import styles from './VideoPlayer.module.css'
-
-function IconPlay() {
-  return (
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  )
-}
-
-function IconControlPlay() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  )
-}
-
-function IconControlPause() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
-    </svg>
-  )
-}
-
-function IconExpand() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-    </svg>
-  )
-}
-
-function IconCompress() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-    </svg>
-  )
-}
-
-function formatTime(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return '0:00'
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = Math.floor(seconds % 60)
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-  return `${m}:${String(s).padStart(2, '0')}`
-}
-
-function toMediaUrl(filePath: string): string {
-  const normalized = filePath.replace(/\\/g, '/')
-  const segments = normalized.split('/').map(encodeURIComponent)
-  return `media://file/${segments.join('/')}`
-}
 
 function VideoPlayer() {
   const areaRef = useRef<HTMLElement>(null)
@@ -63,7 +12,6 @@ function VideoPlayer() {
   const inputRef = useRef<HTMLInputElement>(null)
   const objectUrlRef = useRef<string | null>(null)
   const [playing, setPlaying] = useState(false)
-  const [hasVideo, setHasVideo] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [src, setSrc] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(0)
@@ -86,19 +34,10 @@ function VideoPlayer() {
   }, [])
 
   useEffect(() => {
-    const listener = (_event: unknown, filePath: string) => loadPath(filePath)
-    window.ipcRenderer?.on('video:open', listener)
-    return () => {
-      window.ipcRenderer?.off('video:open', listener)
-    }
+    const api = window.tocae
+    if (!api) return
+    return api.onVideoOpen((filePath) => loadPath(filePath))
   }, [])
-
-  function resetPlayback() {
-    setHasVideo(true)
-    setCurrentTime(0)
-    setDuration(0)
-    setPlaying(false)
-  }
 
   function loadFile(file: File | undefined) {
     if (!file) return
@@ -111,6 +50,12 @@ function VideoPlayer() {
   function loadPath(filePath: string) {
     setSrc(toMediaUrl(filePath))
     resetPlayback()
+  }
+
+  function resetPlayback() {
+    setCurrentTime(0)
+    setDuration(0)
+    setPlaying(false)
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -156,6 +101,7 @@ function VideoPlayer() {
     }
   }
 
+  const hasVideo = src !== null
   const paused = !playing
 
   return (
@@ -172,7 +118,7 @@ function VideoPlayer() {
       {hasVideo ? (
         <>
           <video
-            key={src ?? undefined}
+            key={src}
             ref={videoRef}
             className={styles.video}
             src={src ?? undefined}
@@ -194,7 +140,7 @@ function VideoPlayer() {
             aria-label="Reproduzir"
             title="Reproduzir"
           >
-            <IconPlay />
+            <PlayIcon size={30} />
           </button>
           <div className={styles.controlsBar}>
             <button
@@ -204,7 +150,7 @@ function VideoPlayer() {
               aria-label={paused ? 'Reproduzir' : 'Pausar'}
               title={paused ? 'Reproduzir' : 'Pausar'}
             >
-              {paused ? <IconControlPlay /> : <IconControlPause />}
+              {paused ? <PlayIcon /> : <PauseIcon />}
             </button>
             <span className={styles.time}>{formatTime(currentTime)}</span>
             <input
@@ -228,7 +174,7 @@ function VideoPlayer() {
               aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
               title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
             >
-              {isFullscreen ? <IconCompress /> : <IconExpand />}
+              {isFullscreen ? <CompressIcon /> : <ExpandIcon />}
             </button>
           </div>
         </>
@@ -244,7 +190,7 @@ function VideoPlayer() {
         >
           <img
             className={styles.wordmark}
-            src="/tocae-wordmark.png"
+            src={wordmark}
             alt="Tocaê Reprodutor"
             draggable={false}
           />
