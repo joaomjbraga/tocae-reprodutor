@@ -1,5 +1,6 @@
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
+import { IPC_CHANNELS } from '@shared/ipc'
 import {
   ABOUT_TITLE,
   APP_TITLE,
@@ -85,7 +86,7 @@ export function createShortcutsWindow(): void {
   shortcutsWindow = new BrowserWindow({
     title: SHORTCUTS_TITLE,
     width: 380,
-    height: 320,
+    height: 440,
     resizable: false,
     maximizable: false,
     minimizable: false,
@@ -112,6 +113,13 @@ export function focusMainWindow(): void {
   if (!mainWindow) return
   if (mainWindow.isMinimized()) mainWindow.restore()
   mainWindow.focus()
+}
+
+export function registerWindowIpc(): void {
+  ipcMain.handle(IPC_CHANNELS.WINDOW_OPEN, (_event, target: unknown) => {
+    if (target === 'about') createAboutWindow()
+    else if (target === 'shortcuts') createShortcutsWindow()
+  })
 }
 
 function loadRenderer(window: BrowserWindow, options: { hash?: string } = {}): void {

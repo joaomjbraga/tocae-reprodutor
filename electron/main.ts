@@ -1,7 +1,8 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 import { registerMediaSchemes, registerMediaProtocol } from './media/protocol'
-import { createMainWindow, focusMainWindow } from './windows'
-import { buildApplicationMenu } from './menu'
+import { registerDialogIpc } from './dialogs'
+import { registerPlaylistIpc } from './playlist'
+import { createMainWindow, focusMainWindow, registerWindowIpc } from './windows'
 import { DESKTOP_FILE_NAME } from './paths'
 
 registerMediaSchemes()
@@ -28,8 +29,11 @@ if (!gotTheLock) {
   })
 
   app.whenReady().then(() => {
+    Menu.setApplicationMenu(null)
     registerMediaProtocol()
-    buildApplicationMenu()
+    registerPlaylistIpc()
+    registerDialogIpc()
+    registerWindowIpc()
     createMainWindow()
   })
 }

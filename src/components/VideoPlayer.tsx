@@ -1,27 +1,49 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, SyntheticEvent } from 'react'
 import {
-  CompressIcon,
-  ExpandIcon,
-  PauseIcon,
-  PlayIcon,
-  VolumeHighIcon,
-  VolumeLowIcon,
-  VolumeMuteIcon,
-} from './icons'
+  Maximize,
+  Minimize,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from 'lucide-react'
 import { formatTime } from '../lib/format'
-import { toMediaUrl } from '../lib/media'
 import wordmark from '../assets/tocae-wordmark.png'
 import styles from './VideoPlayer.module.css'
 
-function VideoPlayer() {
+type VideoPlayerProps = {
+  source: string | null
+  message: string | null
+  hasNext: boolean
+  hasPrevious: boolean
+  onNext: () => void
+  onPrevious: () => void
+  onEnded: () => void
+  onFailed: () => void
+  onFilesSelected: (files: File[]) => void
+}
+
+function VideoPlayer({
+  source,
+  message,
+  hasNext,
+  hasPrevious,
+  onNext,
+  onPrevious,
+  onEnded,
+  onFailed,
+  onFilesSelected,
+}: VideoPlayerProps) {
   const areaRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const objectUrlRef = useRef<string | null>(null)
+  const failedSourceRef = useRef<string | null>(null)
   const [playing, setPlaying] = useState(false)
   const [dragging, setDragging] = useState(false)
-  const [src, setSrc] = useState<string | null>(null)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [seeking, setSeeking] = useState(false)
@@ -38,16 +60,11 @@ function VideoPlayer() {
   }, [])
 
   useEffect(() => {
-    return () => {
-      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
-    }
-  }, [])
-
-  useEffect(() => {
-    const api = window.tocae
-    if (!api) return
-    return api.onVideoOpen((filePath) => loadPath(filePath))
-  }, [])
+    failedSourceRef.current = null
+    setCurrentTime(0)
+    setDuration(0)
+    setPlaying(false)
+  }, [source])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -75,34 +92,17 @@ function VideoPlayer() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  function loadFile(file: File | undefined) {
-    if (!file) return
-    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current)
-    objectUrlRef.current = URL.createObjectURL(file)
-    setSrc(objectUrlRef.current)
-    resetPlayback()
-  }
-
-  function loadPath(filePath: string) {
-    setSrc(toMediaUrl(filePath))
-    resetPlayback()
-  }
-
-  function resetPlayback() {
-    setCurrentTime(0)
-    setDuration(0)
-    setPlaying(false)
-  }
-
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    loadFile(event.target.files?.[0] ?? undefined)
+    const files = Array.from(event.target.files ?? [])
     event.target.value = ''
+    if (files.length > 0) onFilesSelected(files)
   }
 
   function handleDrop(event: DragEvent) {
     event.preventDefault()
     setDragging(false)
-    loadFile(event.dataTransfer.files?.[0] ?? undefined)
+    const files = Array.from(event.dataTransfer.files)
+    if (files.length > 0) onFilesSelected(files)
   }
 
   function togglePlay() {
@@ -113,6 +113,21 @@ function VideoPlayer() {
     } else {
       video.pause()
     }
+  }
+
+  function handleEnded() {
+    setPlaying(false)
+    onEnded()
+  }
+
+  function handleError(event: SyntheticEvent<HTMLVideoElement>) {
+    const video = event.currentTarget
+    const code = video.error?.code ?? 0
+    if (code === 0 || code === 1 || code === 2) return
+    if (failedSourceRef.current === source) return
+    failedSourceRef.current = source
+    setPlaying(false)
+    onFailed()
   }
 
   function handleTimeUpdate(event: SyntheticEvent<HTMLVideoElement>) {
@@ -154,11 +169,13 @@ function VideoPlayer() {
     video.muted = !video.muted
   }
 
-  const volumeIcon = muted || volume === 0
-    ? <VolumeMuteIcon />
-    : volume < 0.5
-      ? <VolumeLowIcon />
-      : <VolumeHighIcon />
+  const volumeIcon = muted || volume === 0 ? (
+    <VolumeX />
+  ) : volume < 0.5 ? (
+    <Volume1 />
+  ) : (
+    <Volume2 />
+  )
 
   function toggleFullscreen() {
     const area = areaRef.current
@@ -170,7 +187,7 @@ function VideoPlayer() {
     }
   }
 
-  const hasVideo = src !== null
+  const hasVideo = source !== null
   const paused = !playing
 
   return (
@@ -187,10 +204,10 @@ function VideoPlayer() {
       {hasVideo ? (
         <>
           <video
-            key={src}
+            key={source}
             ref={videoRef}
             className={styles.video}
-            src={src ?? undefined}
+            src={source ?? undefined}
             autoPlay
             controls={false}
             muted={muted}
@@ -198,7 +215,8 @@ function VideoPlayer() {
             onContextMenu={(event) => event.preventDefault()}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
+            onEnded={handleEnded}
+            onError={handleError}
             onTimeUpdate={handleTimeUpdate}
             onVolumeChange={handleVolumeSync}
             onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
@@ -211,7 +229,7 @@ function VideoPlayer() {
             aria-label="Reproduzir"
             title="Reproduzir"
           >
-            <PlayIcon size={30} />
+            <Play size={30} />
           </button>
           <div className={styles.controlsBar}>
             <button
@@ -221,7 +239,27 @@ function VideoPlayer() {
               aria-label={paused ? 'Reproduzir' : 'Pausar'}
               title={paused ? 'Reproduzir' : 'Pausar'}
             >
-              {paused ? <PlayIcon /> : <PauseIcon />}
+              {paused ? <Play /> : <Pause />}
+            </button>
+            <button
+              type="button"
+              className={styles.controlButton}
+              onClick={onPrevious}
+              disabled={!hasPrevious}
+              aria-label="Vídeo anterior"
+              title="Vídeo anterior (P)"
+            >
+              <SkipBack />
+            </button>
+            <button
+              type="button"
+              className={styles.controlButton}
+              onClick={onNext}
+              disabled={!hasNext}
+              aria-label="Próximo vídeo"
+              title="Próximo vídeo (N)"
+            >
+              <SkipForward />
             </button>
             <span className={styles.time}>{formatTime(currentTime)}</span>
             <input
@@ -266,7 +304,7 @@ function VideoPlayer() {
               aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
               title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
             >
-              {isFullscreen ? <CompressIcon /> : <ExpandIcon />}
+              {isFullscreen ? <Minimize /> : <Maximize />}
             </button>
           </div>
         </>
@@ -286,7 +324,7 @@ function VideoPlayer() {
             alt="Tocaê Reprodutor"
             draggable={false}
           />
-          <p>Abra um vídeo ou arraste-o para cá</p>
+          <p>{message ?? 'Abra um vídeo ou arraste-o para aqui'}</p>
         </div>
       )}
 
@@ -295,6 +333,7 @@ function VideoPlayer() {
         className={styles.fileInput}
         type="file"
         accept="video/*"
+        multiple
         onChange={handleFileChange}
       />
     </section>

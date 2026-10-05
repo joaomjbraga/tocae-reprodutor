@@ -1,0 +1,42 @@
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.layout {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  min-height: 0;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.showList {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3a3a42;
+  border-radius: 6px;
+  background: rgba(10, 10, 10, 0.6);
+  color: #c9c9c9;
+  cursor: pointer;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.showList:hover {
+  background: rgba(20, 20, 20, 0.8);
+  color: #e8e8e8;
+}

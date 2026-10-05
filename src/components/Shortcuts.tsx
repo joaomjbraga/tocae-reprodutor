@@ -2,9 +2,13 @@ import styles from './Shortcuts.module.css'
 import wordmark from '../assets/tocae-wordmark.png'
 
 const SHORTCUTS = [
+  { key: 'Ctrl+O', action: 'Abrir vídeos' },
   { key: 'Espaço', action: 'Reproduzir ou pausar' },
   { key: 'F', action: 'Entrar ou sair da tela cheia' },
   { key: 'M', action: 'Silenciar ou ativar o som' },
+  { key: 'N', action: 'Próximo vídeo da lista' },
+  { key: 'P', action: 'Vídeo anterior da lista' },
+  { key: 'L', action: 'Mostrar ou ocultar a lista' },
 ]
 
 function Shortcuts() {

@@ -1,6 +1,7 @@
-import { dialog } from 'electron'
+import { dialog, ipcMain } from 'electron'
 import { IPC_CHANNELS } from '@shared/ipc'
-import { VIDEO_EXTENSIONS } from './media/mime'
+import { VIDEO_EXTENSIONS } from '@shared/media'
+import { sendCommand } from './commands'
 import { getMainWindow } from './windows'
 
 export async function openVideoDialog(): Promise<void> {
@@ -8,8 +9,8 @@ export async function openVideoDialog(): Promise<void> {
   if (!window) return
 
   const result = await dialog.showOpenDialog(window, {
-    title: 'Abrir vídeo',
-    properties: ['openFile'],
+    title: 'Abrir vídeos',
+    properties: ['openFile', 'multiSelections'],
     filters: [
       { name: 'Vídeos', extensions: [...VIDEO_EXTENSIONS] },
       { name: 'Todos os arquivos', extensions: ['*'] },
@@ -17,5 +18,9 @@ export async function openVideoDialog(): Promise<void> {
   })
 
   if (result.canceled || result.filePaths.length === 0) return
-  window.webContents.send(IPC_CHANNELS.VIDEO_OPEN, result.filePaths[0])
+  sendCommand({ type: 'open-videos', paths: result.filePaths })
+}
+
+export function registerDialogIpc(): void {
+  ipcMain.handle(IPC_CHANNELS.VIDEO_PICK, () => openVideoDialog())
 }

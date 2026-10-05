@@ -1,6 +1,6 @@
 import About from './components/About'
+import PlayerScreen from './components/PlayerScreen'
 import Shortcuts from './components/Shortcuts'
-import VideoPlayer from './components/VideoPlayer'
 import styles from './App.module.css'
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
   return (
     <div className={styles.app}>
       <main className={styles.content}>
-        <VideoPlayer />
+        <PlayerScreen />
       </main>
     </div>
   )

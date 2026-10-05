@@ -1,0 +1,52 @@
+.appBar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #9a9aa3;
+  cursor: pointer;
+  transition: background-color 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+}
+
+.button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8e8e8;
+}
+
+.button.active {
+  border-color: #4a4a52;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e8e8e8;
+}
+
+.button:disabled {
+  color: #4e4e56;
+  cursor: default;
+}
+
+.button:disabled:hover {
+  background: transparent;
+  color: #4e4e56;
+}
+
+.separator {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: #33333a;
+}
+
+.spacer {
+  flex: 1;
+}

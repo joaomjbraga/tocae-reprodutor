@@ -1,14 +1,20 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type { IpcRendererEvent } from 'electron'
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { TocaeApi } from '@shared/ipc'
+import type { AppCommand, TocaeApi, WindowTarget } from '@shared/ipc'
+import type { PlaylistItem } from '@shared/playlist'
 
 const api: TocaeApi = {
-  onVideoOpen(callback) {
-    const listener = (_event: IpcRendererEvent, filePath: string) => callback(filePath)
-    ipcRenderer.on(IPC_CHANNELS.VIDEO_OPEN, listener)
-    return () => ipcRenderer.off(IPC_CHANNELS.VIDEO_OPEN, listener)
+  onCommand(callback) {
+    const listener = (_event: IpcRendererEvent, command: AppCommand) => callback(command)
+    ipcRenderer.on(IPC_CHANNELS.COMMAND, listener)
+    return () => ipcRenderer.off(IPC_CHANNELS.COMMAND, listener)
   },
+  readPlaylist: () => ipcRenderer.invoke(IPC_CHANNELS.PLAYLIST_READ),
+  writePlaylist: (items: PlaylistItem[]) => ipcRenderer.invoke(IPC_CHANNELS.PLAYLIST_WRITE, items),
+  openVideoDialog: () => ipcRenderer.invoke(IPC_CHANNELS.VIDEO_PICK),
+  openWindow: (target: WindowTarget) => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_OPEN, target),
+  getPathForFile: (file: File) => webUtils.getPathForFile(file),
 }
 
 contextBridge.exposeInMainWorld('tocae', api)
