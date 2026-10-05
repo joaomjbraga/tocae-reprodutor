@@ -12,6 +12,15 @@
     "dist",
     "dist-electron"
   ],
+  // Alimenta o electron-updater: o builder publica os artefatos e o latest.yml
+  // na release do GitHub, que é o feed consultado pelo app.
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "joaomjbraga",
+      "repo": "tocae-reprodutor"
+    }
+  ],
   "linux": {
     "target": [
       "rpm"

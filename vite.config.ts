@@ -14,7 +14,14 @@ export default defineConfig({
     electron({
       main: {
         entry: 'electron/main.ts',
-        vite: { resolve: { alias: aliases } },
+        vite: {
+          resolve: { alias: aliases },
+          build: {
+            rollupOptions: {
+              external: ['electron-updater'],
+            },
+          },
+        },
       },
       preload: {
         input: path.join(import.meta.dirname, 'electron/preload.ts'),

@@ -9,6 +9,7 @@ const SHORTCUTS = [
   { key: 'N', action: 'Próximo vídeo da lista' },
   { key: 'P', action: 'Vídeo anterior da lista' },
   { key: 'L', action: 'Mostrar ou ocultar a lista' },
+  { key: 'Alt+↑ / Alt+↓', action: 'Mover o item focado na lista' },
 ]
 
 function Shortcuts() {

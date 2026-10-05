@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent, DragEvent, SyntheticEvent } from 'react'
+import type { ChangeEvent, CSSProperties, DragEvent, SyntheticEvent } from 'react'
 import {
+  Loader2,
   Maximize,
   Minimize,
   Pause,
@@ -14,6 +15,12 @@ import {
 import { formatTime } from '../lib/format'
 import wordmark from '../assets/tocae-wordmark.png'
 import styles from './VideoPlayer.module.css'
+
+/** Tempo parado até os controles do player se esconderem. */
+const IDLE_DELAY_MS = 2500
+
+/** A timeline desenha o progresso com um custom property lido pelo CSS do trilho. */
+type SeekStyle = CSSProperties & { '--progress': string }
 
 type VideoPlayerProps = {
   source: string | null
@@ -42,7 +49,10 @@ function VideoPlayer({
   const videoRef = useRef<HTMLVideoElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const failedSourceRef = useRef<string | null>(null)
+  const idleTimerRef = useRef<number | null>(null)
   const [playing, setPlaying] = useState(false)
+  const [buffering, setBuffering] = useState(false)
+  const [idle, setIdle] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -64,7 +74,32 @@ function VideoPlayer({
     setCurrentTime(0)
     setDuration(0)
     setPlaying(false)
+    setBuffering(false)
+    setIdle(false)
   }, [source])
+
+  // Controles se escondem depois de um tempo parado durante a reprodução,
+  // como em qualquer player de vídeo. Qualquer interação traz de volta.
+  useEffect(() => {
+    if (!playing) {
+      setIdle(false)
+      return
+    }
+
+    const wake = () => {
+      setIdle(false)
+      if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current)
+      idleTimerRef.current = window.setTimeout(() => setIdle(true), IDLE_DELAY_MS)
+    }
+
+    wake()
+    const events: (keyof WindowEventMap)[] = ['mousemove', 'keydown', 'pointerdown', 'touchstart', 'wheel']
+    events.forEach((type) => window.addEventListener(type, wake, { passive: true }))
+    return () => {
+      events.forEach((type) => window.removeEventListener(type, wake))
+      if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current)
+    }
+  }, [playing])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -170,11 +205,11 @@ function VideoPlayer({
   }
 
   const volumeIcon = muted || volume === 0 ? (
-    <VolumeX />
+    <VolumeX size={16} />
   ) : volume < 0.5 ? (
-    <Volume1 />
+    <Volume1 size={16} />
   ) : (
-    <Volume2 />
+    <Volume2 size={16} />
   )
 
   function toggleFullscreen() {
@@ -189,11 +224,12 @@ function VideoPlayer({
 
   const hasVideo = source !== null
   const paused = !playing
+  const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0
 
   return (
     <section
       ref={areaRef}
-      className={`${styles.videoArea} ${dragging ? styles.dragging : ''} ${playing ? styles.playing : styles.paused}`}
+      className={`${styles.videoArea} ${dragging ? styles.dragging : ''} ${playing ? styles.playing : styles.paused} ${idle ? styles.idle : ''}`}
       onDragOver={(event) => {
         event.preventDefault()
         setDragging(true)
@@ -213,8 +249,15 @@ function VideoPlayer({
             muted={muted}
             onClick={togglePlay}
             onContextMenu={(event) => event.preventDefault()}
-            onPlay={() => setPlaying(true)}
+            onPlay={() => {
+              setPlaying(true)
+              setBuffering(false)
+            }}
             onPause={() => setPlaying(false)}
+            onWaiting={() => setBuffering(true)}
+            onPlaying={() => setBuffering(false)}
+            onCanPlay={() => setBuffering(false)}
+            onSeeked={() => setBuffering(false)}
             onEnded={handleEnded}
             onError={handleError}
             onTimeUpdate={handleTimeUpdate}
@@ -229,8 +272,14 @@ function VideoPlayer({
             aria-label="Reproduzir"
             title="Reproduzir"
           >
-            <Play size={30} />
+            <Play size={24} />
           </button>
+          {buffering && (
+            <div className={styles.buffer} role="status" aria-live="polite">
+              <Loader2 size={28} className={styles.spinner} />
+              <span className="sr-only">Carregando vídeo</span>
+            </div>
+          )}
           <div className={styles.controlsBar}>
             <button
               type="button"
@@ -239,7 +288,7 @@ function VideoPlayer({
               aria-label={paused ? 'Reproduzir' : 'Pausar'}
               title={paused ? 'Reproduzir' : 'Pausar'}
             >
-              {paused ? <Play /> : <Pause />}
+              {paused ? <Play size={16} /> : <Pause size={16} />}
             </button>
             <button
               type="button"
@@ -249,7 +298,7 @@ function VideoPlayer({
               aria-label="Vídeo anterior"
               title="Vídeo anterior (P)"
             >
-              <SkipBack />
+              <SkipBack size={16} />
             </button>
             <button
               type="button"
@@ -259,12 +308,13 @@ function VideoPlayer({
               aria-label="Próximo vídeo"
               title="Próximo vídeo (N)"
             >
-              <SkipForward />
+              <SkipForward size={16} />
             </button>
             <span className={styles.time}>{formatTime(currentTime)}</span>
             <input
               type="range"
               className={styles.seek}
+              style={{ '--progress': `${progressPercent}%` } as SeekStyle}
               min={0}
               max={duration || 0}
               step="any"
@@ -274,6 +324,7 @@ function VideoPlayer({
               onPointerUp={() => setSeeking(false)}
               onPointerCancel={() => setSeeking(false)}
               aria-label="Linha do tempo do vídeo"
+              aria-valuetext={`${formatTime(currentTime)} de ${formatTime(duration)}`}
             />
             <span className={styles.time}>{formatTime(duration)}</span>
             <div className={styles.volume}>
@@ -304,7 +355,7 @@ function VideoPlayer({
               aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
               title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
             >
-              {isFullscreen ? <Minimize /> : <Maximize />}
+              {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
             </button>
           </div>
         </>

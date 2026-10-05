@@ -1,7 +1,7 @@
 .appBar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   flex-shrink: 0;
 }
 
@@ -12,39 +12,47 @@
   place-items: center;
   flex-shrink: 0;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: transparent;
-  color: #9a9aa3;
+  color: var(--text-toolbar);
   cursor: pointer;
-  transition: background-color 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
+    border-color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
 .button:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e8e8e8;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .button.active {
-  border-color: #4a4a52;
-  background: rgba(255, 255, 255, 0.08);
-  color: #e8e8e8;
+  border-color: var(--accent-strong);
+  background: var(--accent-tint);
+  color: var(--accent);
 }
 
 .button:disabled {
-  color: #4e4e56;
+  color: var(--text-disabled);
   cursor: default;
 }
 
 .button:disabled:hover {
   background: transparent;
-  color: #4e4e56;
+  color: var(--text-disabled);
 }
 
 .separator {
   width: 1px;
   height: 18px;
-  margin: 0 4px;
-  background: #33333a;
+  margin: 0 var(--space-1);
+  background: var(--border-surface);
 }
 
 .spacer {

@@ -29,7 +29,7 @@ function AppBar({
         title="Abrir vídeos (Ctrl+O)"
         aria-label="Abrir vídeos"
       >
-        <FolderOpen size={17} />
+        <FolderOpen size={16} />
       </button>
 
       <span className={styles.separator} aria-hidden="true" />
@@ -42,7 +42,7 @@ function AppBar({
         aria-label="Mostrar ou ocultar a lista de reprodução"
         aria-pressed={panelVisible}
       >
-        <ListVideo size={17} />
+        <ListVideo size={16} />
       </button>
 
       <button
@@ -53,7 +53,7 @@ function AppBar({
         title="Limpar lista"
         aria-label="Limpar lista"
       >
-        <Trash2 size={17} />
+        <Trash2 size={16} />
       </button>
 
       <span className={styles.spacer} />
@@ -65,7 +65,7 @@ function AppBar({
         title="Atalhos de teclado"
         aria-label="Atalhos de teclado"
       >
-        <Keyboard size={17} />
+        <Keyboard size={16} />
       </button>
 
       <button
@@ -75,7 +75,7 @@ function AppBar({
         title="Sobre o Tocaê"
         aria-label="Sobre o Tocaê Reprodutor"
       >
-        <Info size={17} />
+        <Info size={16} />
       </button>
     </header>
   )

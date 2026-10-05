@@ -1,5 +1,9 @@
+@import './styles/tokens.css';
+@import './fonts.css';
+
 * {
   box-sizing: border-box;
+  font-family: var(--font-ui);
 }
 
 html,
@@ -10,11 +14,39 @@ body,
 }
 
 body {
-  font-family: 'Segoe UI Variable', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  color: #d4d4d4;
+  font-family: var(--font-ui);
+  color: var(--text-body);
   background:
-    radial-gradient(120% 90% at 18% 0%, #232330 0%, #161619 45%, #101014 100%);
+    radial-gradient(120% 90% at 18% 0%, var(--bg-glow) 0%, var(--bg-mid) 45%, var(--bg-app) 100%);
   overflow: hidden;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Visualmente escondido, ainda lido por leitores de tela.
+   Compartilhado entre o player e o painel da lista. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* Respeita a preferência do sistema: sem movimento, sem shimmer, sem pulso.
+   Mantém apenas as transições de opacidade instantâneas que carregam estado. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

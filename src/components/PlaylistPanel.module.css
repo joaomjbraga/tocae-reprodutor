@@ -4,36 +4,55 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border: 1px solid #33333a;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border-surface);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  transition:
+    opacity var(--duration-exit) var(--ease-exit),
+    transform var(--duration-exit) var(--ease-exit),
+    margin-right var(--duration-panel) var(--ease-standard);
+}
+
+/* Saída: encolhe a largura para 0 para o palco ocupar o espaço sem salto. */
+.panel.closing {
+  opacity: 0;
+  transform: translateX(16px);
+  margin-right: calc(-250px - var(--space-3));
+  pointer-events: none;
+}
+
+/* Arquivos do sistema sendo arrastados sobre o painel (espelha o .dragging do player) */
+.panel.dropping {
+  border-color: var(--accent-strong);
+  border-style: dashed;
+  background: var(--accent-tint);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 10px 10px 12px;
-  border-bottom: 1px solid #2a2a30;
+  gap: var(--space-2);
+  padding: 6px var(--space-2) 6px var(--space-3);
+  border-bottom: 1px solid var(--border-hairline);
 }
 
 .title {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 13px;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: #e8e8e8;
+  color: var(--text-primary);
 }
 
 .count {
   padding: 1px 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #a8a8a8;
-  font-size: 11px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-active);
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -45,45 +64,101 @@
   place-items: center;
   flex-shrink: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: #a8a8a8;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: background-color 0.1s ease, color 0.1s ease;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.iconButton:active {
+  transform: scale(0.92);
 }
 
 .iconButton:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #e8e8e8;
+  background: var(--bg-active);
+  color: var(--text-primary);
 }
 
 .list {
   flex: 1;
   min-height: 0;
   margin: 0;
-  padding: 4px 0;
+  padding: var(--space-1) 0;
   overflow-y: auto;
   list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* Firefox usa scrollbar-color; o Chromium precisa dos pseudo-elementos. */
+.list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.list::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  background-clip: content-box;
+}
+
+.list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-disabled);
+  background-clip: content-box;
 }
 
 .row {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 8px 0 2px;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) 0 2px;
+  transition:
+    background-color var(--duration-base),
+    box-shadow var(--duration-base);
+  /* Entrada em cascata: cada linha atrasa um pouco mais que a anterior */
+  animation: row-enter var(--duration-enter) var(--ease-standard) both;
+  animation-delay: calc(var(--i, 0) * 24ms);
+}
+
+@keyframes row-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .row:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-row-hover);
 }
 
 .row.active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--accent-tint);
+  /* barra do item em reprodução sem deslocar o layout */
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .row.dragging {
   opacity: 0.4;
+}
+
+/* O vídeo já estava na lista: um realce, não um movimento. Como é uma classe
+   comum (não uma animation), removê-la não reinicia a animação de entrada. */
+.row.pulse {
+  background: var(--accent-tint);
+  box-shadow: inset 2px 0 0 var(--accent), inset 0 0 0 1px var(--accent);
 }
 
 .row.dropBefore::before,
@@ -93,8 +168,8 @@
   left: 6px;
   right: 6px;
   height: 2px;
-  border-radius: 1px;
-  background: #e8e8e8;
+  border-radius: var(--radius-xs);
+  background: var(--accent);
 }
 
 .row.dropBefore::before {
@@ -105,52 +180,86 @@
   bottom: -1px;
 }
 
+/* A linha de inserção pisca enquanto o item está sendo posicionado */
+.row.dropBefore::before,
+.row.dropAfter::after {
+  animation: drop-pulse var(--duration-drop) var(--ease-inout) infinite;
+}
+
+@keyframes drop-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .item {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 4px;
+  gap: var(--space-2);
+  padding: var(--space-2);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: #d4d4d4;
+  color: var(--text-body);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-xs);
   text-align: left;
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.item:active {
+  transform: scale(0.985);
 }
 
 .handle {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  color: #55555d;
+  color: var(--text-subtle);
   cursor: grab;
 }
 
 .row:hover .handle {
-  color: #8a8a93;
+  color: var(--text-muted);
 }
 
 .playingIcon {
   min-width: 12px;
   flex-shrink: 0;
-  color: #e8e8e8;
+  color: var(--accent);
+  animation: playing-pulse var(--duration-pulse) var(--ease-inout) infinite;
+}
+
+@keyframes playing-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .index {
   min-width: 12px;
   flex-shrink: 0;
-  color: #6f6f78;
-  font-size: 11px;
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
 .row.active .name {
-  color: #ffffff;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -161,6 +270,8 @@
   text-overflow: ellipsis;
 }
 
+/* Padrão: visível. Aparece sempre em telas sem hover (toque), onde não existe
+   :hover para revelá-lo. */
 .remove {
   width: 22px;
   height: 22px;
@@ -168,36 +279,108 @@
   place-items: center;
   flex-shrink: 0;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: #6f6f78;
+  color: var(--text-muted);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.1s ease, color 0.1s ease;
+  transition:
+    opacity var(--duration-fast),
+    color var(--duration-fast),
+    transform var(--duration-fast);
 }
 
-.row:hover .remove,
-.remove:focus-visible {
-  opacity: 1;
+/* Alvo de toque maior em ponteiro grosso, onde o botão fica sempre visível. */
+@media (pointer: coarse) {
+  .remove {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (hover: hover) {
+  .remove {
+    opacity: 0;
+    /* Sem isto, o botão invisível continuaria na árvore de acertos e um clique
+       na borda da linha apagaria o vídeo sem nenhuma pista visual. */
+    pointer-events: none;
+  }
+
+  .row:hover .remove,
+  .remove:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.remove:active {
+  transform: scale(0.9);
 }
 
 .remove:hover {
-  color: #e88e8e;
+  color: var(--text-danger);
 }
 
 .empty {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
   margin: 0;
-  padding: 16px;
-  color: #8a8a93;
-  font-size: 12px;
+  padding: var(--space-4);
+  color: var(--text-subtle);
+  font-size: var(--text-xs);
   line-height: 1.5;
   text-align: center;
 }
 
+.emptyIcon {
+  color: var(--text-disabled);
+}
+
+/* Esqueleto enquanto o playlist.json é lido: evita o flash de "lista vazia"
+   na abertura do app. */
+.skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-2);
+  list-style: none;
+}
+
+.skeletonRow {
+  height: 28px;
+}
+
+.skeletonBlock {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--bg-row-hover) 0%,
+    var(--bg-active) 40%,
+    var(--bg-row-hover) 80%
+  );
+  background-size: 220% 100%;
+  animation: shimmer var(--duration-shimmer) var(--ease-linear) infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 140% 0;
+  }
+  to {
+    background-position: -40% 0;
+  }
+}
+
 .footer {
-  padding: 8px;
-  border-top: 1px solid #2a2a30;
+  padding: var(--space-2);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .clear {
@@ -207,17 +390,24 @@
   justify-content: center;
   gap: 6px;
   padding: 6px;
-  border: 1px solid #3a3a42;
-  border-radius: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
   background: transparent;
-  color: #a8a8a8;
+  color: var(--text-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--text-xs);
   cursor: pointer;
-  transition: background-color 0.1s ease, color 0.1s ease;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.clear:active {
+  transform: scale(0.98);
 }
 
 .clear:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e8e8e8;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }

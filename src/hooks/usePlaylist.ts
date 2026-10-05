@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PlaylistItem } from '@shared/playlist'
 import { baseNameFor } from '../lib/format'
 import { isVideoFile, toMediaUrl } from '../lib/media'
@@ -12,6 +12,14 @@ interface PlaylistState {
   error: string | null
   panelVisible: boolean
   loaded: boolean
+  /** Ids duplicados recém-detectados, para o realce temporário das linhas. */
+  pulseIds: string[]
+}
+
+/** O que "Limpar lista" remove, guardado para permitir o desfazer. */
+export interface PlaylistSnapshot {
+  items: PlaylistItem[]
+  currentIndex: number
 }
 
 const INITIAL_STATE: PlaylistState = {
@@ -20,7 +28,13 @@ const INITIAL_STATE: PlaylistState = {
   error: null,
   panelVisible: true,
   loaded: false,
+  pulseIds: [],
 }
+
+/** Quanto tempo a linha duplicada fica realçada, em ms. */
+const PULSE_MS = 1400
+/** Teto de linhas realçadas ao mesmo tempo, para não virar um pisca-pisca. */
+const PULSE_LIMIT = 8
 
 function createEntry(filePath: string, fallbackName: string): PlaylistItem {
   return {
@@ -32,6 +46,18 @@ function createEntry(filePath: string, fallbackName: string): PlaylistItem {
 
 export function usePlaylist() {
   const [state, setState] = useState<PlaylistState>(INITIAL_STATE)
+  // Espelho sempre atual do estado: clear() precisa devolver os itens removidos
+  // de forma síncrona, e setState não oferece esse retorno.
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  useEffect(() => {
+    if (state.pulseIds.length === 0) return
+    const timer = window.setTimeout(() => {
+      setState((prev) => (prev.pulseIds.length === 0 ? prev : { ...prev, pulseIds: [] }))
+    }, PULSE_MS)
+    return () => window.clearTimeout(timer)
+  }, [state.pulseIds])
 
   useEffect(() => {
     let active = true
@@ -66,20 +92,34 @@ export function usePlaylist() {
     if (entries.length === 0) return
 
     setState((prev) => {
-      const known = new Set(prev.items.map((item) => item.path))
+      const known = new Map(prev.items.map((item) => [item.path, item.id]))
       const fresh: PlaylistItem[] = []
+      const duplicates: string[] = []
       for (const entry of entries) {
-        if (known.has(entry.path)) continue
-        known.add(entry.path)
+        const existingId = known.get(entry.path)
+        if (existingId) {
+          // Já está na lista: realça a linha existente em vez de ignorar em silêncio.
+          duplicates.push(existingId)
+          continue
+        }
+        known.set(entry.path, entry.id)
         fresh.push(entry)
       }
-      if (fresh.length === 0) return prev
+      if (fresh.length === 0 && duplicates.length === 0) return prev
+
+      const pulseIds = [...new Set([...prev.pulseIds, ...duplicates])].slice(-PULSE_LIMIT)
 
       return {
         ...prev,
-        items: [...prev.items, ...fresh],
-        currentIndex: prev.currentIndex === -1 ? prev.items.length : prev.currentIndex,
-        error: null,
+        items: fresh.length > 0 ? [...prev.items, ...fresh] : prev.items,
+        currentIndex:
+          fresh.length === 0
+            ? prev.currentIndex
+            : prev.currentIndex === -1
+              ? prev.items.length
+              : prev.currentIndex,
+        error: fresh.length > 0 ? null : prev.error,
+        pulseIds,
       }
     })
   }, [])
@@ -184,21 +224,39 @@ export function usePlaylist() {
     })
   }, [])
 
-  const clear = useCallback(() => {
-    setState((prev) =>
-      prev.items.length === 0 && prev.currentIndex === -1
-        ? prev
-        : { ...prev, items: [], currentIndex: -1, error: null },
+  /** Limpa a lista devolvendo o que foi removido, ou null se já estava vazia. */
+  const clear = useCallback((): PlaylistSnapshot | null => {
+    const prev = stateRef.current
+    if (prev.items.length === 0) return null
+
+    const snapshot: PlaylistSnapshot = { items: prev.items, currentIndex: prev.currentIndex }
+    setState((s) =>
+      s.items.length === 0 && s.currentIndex === -1
+        ? s
+        : { ...s, items: [], currentIndex: -1, error: null, pulseIds: [] },
     )
+    return snapshot
+  }, [])
+
+  const restore = useCallback((snapshot: PlaylistSnapshot) => {
+    setState((prev) => {
+      const items = [...snapshot.items]
+      const currentIndex =
+        snapshot.currentIndex >= 0 && snapshot.currentIndex < items.length ? snapshot.currentIndex : -1
+      return { ...prev, items, currentIndex, error: null, pulseIds: [] }
+    })
   }, [])
 
   const togglePanel = useCallback(() => {
     setState((prev) => ({ ...prev, panelVisible: !prev.panelVisible }))
   }, [])
 
+  const pulseIds = useMemo(() => new Set(state.pulseIds), [state.pulseIds])
+
   return useMemo(
     () => ({
       items: state.items,
+      pulseIds,
       currentIndex: state.currentIndex,
       current: state.currentIndex >= 0 ? (state.items[state.currentIndex] ?? null) : null,
       source:
@@ -207,6 +265,7 @@ export function usePlaylist() {
           : null,
       error: state.error,
       panelVisible: state.panelVisible,
+      loaded: state.loaded,
       hasNext: state.currentIndex >= 0 && state.currentIndex + 1 < state.items.length,
       hasPrevious: state.currentIndex > 0,
       addPaths,
@@ -217,14 +276,17 @@ export function usePlaylist() {
       move,
       remove,
       clear,
+      restore,
       togglePanel,
       failCurrent,
     }),
     [
       state.items,
+      pulseIds,
       state.currentIndex,
       state.error,
       state.panelVisible,
+      state.loaded,
       addPaths,
       addFiles,
       playIndex,
@@ -233,6 +295,7 @@ export function usePlaylist() {
       move,
       remove,
       clear,
+      restore,
       togglePanel,
       failCurrent,
     ],

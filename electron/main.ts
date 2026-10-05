@@ -2,6 +2,7 @@ import { app, BrowserWindow, Menu } from 'electron'
 import { registerMediaSchemes, registerMediaProtocol } from './media/protocol'
 import { registerDialogIpc } from './dialogs'
 import { registerPlaylistIpc } from './playlist'
+import { registerUpdater } from './updater'
 import { createMainWindow, focusMainWindow, registerWindowIpc } from './windows'
 import { DESKTOP_FILE_NAME } from './paths'
 
@@ -35,5 +36,6 @@ if (!gotTheLock) {
     registerDialogIpc()
     registerWindowIpc()
     createMainWindow()
+    registerUpdater()
   })
 }

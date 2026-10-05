@@ -2,14 +2,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   min-height: 0;
 }
 
 .layout {
   flex: 1;
   display: flex;
-  gap: 12px;
+  gap: var(--space-3);
   min-height: 0;
 }
 
@@ -22,21 +22,28 @@
 
 .showList {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: var(--space-2);
+  right: var(--space-2);
   width: 32px;
   height: 32px;
   display: grid;
   place-items: center;
-  border: 1px solid #3a3a42;
-  border-radius: 6px;
-  background: rgba(10, 10, 10, 0.6);
-  color: #c9c9c9;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-scrim);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: background-color 0.1s ease, color 0.1s ease;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.showList:active {
+  transform: scale(0.92);
 }
 
 .showList:hover {
-  background: rgba(20, 20, 20, 0.8);
-  color: #e8e8e8;
+  background: var(--bg-scrim-strong);
+  color: var(--text-primary);
 }

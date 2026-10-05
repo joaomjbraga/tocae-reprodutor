@@ -1,0 +1,91 @@
+.toast {
+  position: absolute;
+  left: 50%;
+  /* Acima da barra de controles (49px: botão de 32px + 2*8px + borda). */
+  bottom: calc(50px + var(--space-3));
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100% - var(--space-4) * 2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  background: var(--bg-scrim-strong);
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  animation: toast-enter var(--duration-enter) var(--ease-standard) both;
+}
+
+.message {
+  color: var(--text-body);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--bg-chip);
+  color: var(--accent);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.action:hover {
+  background: var(--bg-hover);
+}
+
+.action:active {
+  transform: scale(0.96);
+}
+
+/* Contagem regressiva: o tempo que resta para o aviso sumir sozinho. */
+.timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent-strong);
+  transform-origin: left center;
+  animation: toast-timer var(--toast-duration) var(--ease-linear) forwards;
+}
+
+@keyframes toast-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Sem movimento a contagem não informa nada: some com a barra. */
+  .timer {
+    display: none;
+  }
+}

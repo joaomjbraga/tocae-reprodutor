@@ -1,0 +1,93 @@
+/**
+ * Design tokens do Tocaê Reprodutor.
+ *
+ * Único arquivo do projeto onde cores, espaços, raios e durações são
+ * declarados. Os CSS Modules consomem apenas `var()`.
+ *
+ * O acento deriva da cor da marca (teal, matiz 171 no wordmark). A cor pura
+ * do logo (#0d5c50) tem 2.4:1 de contraste sobre o fundo do app, então o
+ * acento é um tom mais claro do mesmo matiz (#43ab93, 6.8:1).
+ *
+ * Tema: apenas dark. Os nomes são semânticos para permitir um tema claro
+ * futuramente sem reescrever os componentes.
+ */
+
+:root {
+  /* Superfícies */
+  --bg-app: #101014; /* espelha electron/windows.ts (backgroundColor do boot) */
+  --bg-glow: #232330; /* origem do gradiente radial do body */
+  --bg-mid: #161619; /* meio do gradiente radial do body */
+  --bg-surface: rgba(255, 255, 255, 0.015); /* painel da lista */
+  --bg-sheen: rgba(255, 255, 255, 0.02); /* brilho no topo da área do vídeo */
+  --bg-bar: rgba(8, 8, 8, 0.55); /* barra de controles */
+  --bg-scrim: rgba(10, 10, 10, 0.6); /* botão central e botão flutuante */
+  --bg-scrim-strong: rgba(20, 20, 20, 0.75); /* hover dos anteriores */
+  --bg-fullscreen: #000; /* área do vídeo em tela cheia */
+  --bg-chip: rgba(255, 255, 255, 0.05); /* tecla de atalho */
+  --bg-row-hover: rgba(255, 255, 255, 0.04);
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-active: rgba(255, 255, 255, 0.08);
+
+  /* Bordas */
+  --border-hairline: #2a2a30; /* divisórias internas */
+  --border-surface: #33333a; /* contorno de painel e área do vídeo */
+  --border-strong: #3a3a42; /* trilhos de slider e botão flutuante */
+  --border-emphasis: #4a4a4a; /* tecla de atalho e botão central */
+  /* Botões de ícone sobre a barra: a fronteira é sugerida pelo glifo, por isso
+     fica abaixo de 3:1 de propósito. */
+  --border-control: rgba(255, 255, 255, 0.14);
+
+  /* Texto */
+  --text-primary: #e8e8e8; /* títulos e glifos em repouso */
+  --text-body: #d4d4d4; /* texto corrido */
+  --text-secondary: #c9c9c9; /* tempo e dados */
+  --text-muted: #a8a8a8; /* apoio: contagem, índice, ações do rodapé */
+  --text-subtle: #8a8a93; /* alça de arrasto e texto vago (5.3:1) */
+  --text-toolbar: #9a9aa3; /* ícones da barra superior */
+  --text-disabled: #6b6b75; /* controles inativos (3.7:1, ainda bem mais apagado que o repouso) */
+  --text-danger: #e88e8e; /* hover do remover */
+
+  /* Acento: apenas estados ativos (item em reprodução, foco, inserção) */
+  --accent: #43ab93;
+  --accent-strong: #2f8f7c;
+  --accent-tint: rgba(67, 171, 147, 0.14);
+  --focus-ring: var(--accent);
+
+  /* Espaço */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  /* Raios */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+
+  /* Tipografia */
+  --font-ui: 'Inter', 'Segoe UI Variable', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-lg: 18px;
+
+  /* Movimento: duração e easing são tokens separados de propósito. Um token que
+   carregasse os dois invalidaria `transition: opacity var(--dur) var(--ease)`
+   (duas timing-functions no mesmo shorthand caem para `unset` em silêncio). */
+  --duration-fast: 100ms; /* feedback de pressão, hover */
+  --duration-base: 150ms; /* opacidade do player */
+  --duration-enter: 180ms; /* entradas */
+  --duration-exit: 140ms; /* saídas: mais rápidas que as entradas */
+  --duration-panel: 200ms; /* abrir/fechar o painel */
+  --duration-spin: 900ms;
+  --duration-pulse: 2400ms; /* ícone do item em reprodução */
+  --duration-drop: 1100ms; /* linha de inserção */
+  --duration-shimmer: 1400ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-linear: linear;
+}

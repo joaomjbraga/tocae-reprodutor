@@ -26,6 +26,8 @@ export function createMainWindow(): BrowserWindow {
     height: 600,
     minWidth: 480,
     minHeight: 320,
+    // Espelha --bg-app (src/styles/tokens.css): evita flash branco antes do
+    // renderer aplicar o gradiente.
     backgroundColor: '#101014',
     show: false,
     icon: ICON_PATH,
@@ -59,6 +61,8 @@ export function createAboutWindow(): void {
     maximizable: false,
     minimizable: false,
     parent: mainWindow ?? undefined,
+    // Espelha --bg-app (src/styles/tokens.css): evita flash branco antes do
+    // renderer aplicar o gradiente.
     backgroundColor: '#101014',
     show: false,
     icon: ICON_PATH,
@@ -91,6 +95,8 @@ export function createShortcutsWindow(): void {
     maximizable: false,
     minimizable: false,
     parent: mainWindow ?? undefined,
+    // Espelha --bg-app (src/styles/tokens.css): evita flash branco antes do
+    // renderer aplicar o gradiente.
     backgroundColor: '#101014',
     show: false,
     icon: ICON_PATH,
