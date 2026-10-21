@@ -87,11 +87,29 @@ flatpak run io.github.joaomjbraga.tocae-reprodutor
 
 ## Submissão
 
+O PR de submissão é aberto pelo autor do projeto.
+
+O fork `joaomjbraga/flathub` já existe e o branch
+`add-io-github-joaomjbraga-tocae-reprodutor` já está publicado com os seis
+arquivos da submissão. Então o caminho mais curto é:
+
+```sh
+gh pr create --repo flathub/flathub --base new-pr \
+  --head joaomjbraga:add-io-github-joaomjbraga-tocae-reprodutor \
+  --title "Add io.github.joaomjbraga.tocae-reprodutor" \
+  --body-file flathub-pr-body.md
+```
+
+Para refazer do zero, do fork em diante:
+
 ```sh
 # 1. Fork e branch de submissão
-gh repo fork flathub/flathub --clone --remote=false
-git clone --branch=new-pr git@github.com:<seu-usuario>/flathub.git
+gh repo fork flathub/flathub --clone=false
+git clone --depth 1 --branch new-pr https://github.com/joaomjbraga/flathub.git
 cd flathub && git checkout --track origin/new-pr
+git remote add upstream https://github.com/flathub/flathub.git
+git checkout -b add-io.github.joaomjbraga.tocae-reprodutor
+git remote set-url origin https://github.com/joaomjbraga/flathub.git
 
 # 2. Copiar os arquivos da submissão para a raiz
 cp ~/flathub-submission/* .
@@ -99,11 +117,22 @@ cp ~/flathub-submission/* .
 # 3. Commit e push
 git add .
 git commit -m "Add io.github.joaomjbraga.tocae-reprodutor"
-git push origin new-pr
+git push origin add-io.github.joaomjbraga.tocae-reprodutor
 
 # 4. Abrir o PR contra a branch new-pr
-gh pr create --base new-pr --title "Add io.github.joaomjbraga.tocae-reprodutor" --body "..."
+gh pr create --repo flathub/flathub --base new-pr \
+  --head joaomjbraga:add-io.github.joaomjbraga.tocae-reprodutor \
+  --title "Add io.github.joaomjbraga.tocae-reprodutor" \
+  --body-file flathub-pr-body.md
 ```
+
+O corpo do PR está em `flathub-pr-body.md`, com o checklist do Flathub
+preenchido. **Revise e ajuste antes de enviar**: o checklist é uma atestação do
+autor e todos os boxes precisam estar marcados, senão o bot bloqueia o PR.
+
+Vídeo da aplicação rodando como Flatpak no Linux (obrigatório no checklist):
+
+<https://github.com/joaomjbraga/tocae-reprodutor/releases/download/v0.0.3/tocae-reprodutor.mp4>
 
 Depois de mergear, comente `bot, build` no PR para gerar o build de teste.
 
