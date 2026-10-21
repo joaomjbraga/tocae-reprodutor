@@ -2,18 +2,25 @@ import { BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
 import { IPC_CHANNELS } from '@shared/ipc'
 import {
-  ABOUT_TITLE,
   APP_TITLE,
   ICON_PATH,
   PRELOAD_PATH,
   RENDERER_DIST,
-  SHORTCUTS_TITLE,
   VITE_DEV_SERVER_URL,
+  aboutTitle,
+  shortcutsTitle,
 } from './paths'
+import { getAppLocale, onLocaleChange } from './locale'
 
 let mainWindow: BrowserWindow | null = null
 let aboutWindow: BrowserWindow | null = null
 let shortcutsWindow: BrowserWindow | null = null
+
+// Os títulos das janelas auxiliares acompanham o idioma em uso.
+onLocaleChange((locale) => {
+  aboutWindow?.setTitle(aboutTitle(locale))
+  shortcutsWindow?.setTitle(shortcutsTitle(locale))
+})
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow
@@ -54,7 +61,7 @@ export function createAboutWindow(): void {
   }
 
   aboutWindow = new BrowserWindow({
-    title: ABOUT_TITLE,
+    title: aboutTitle(getAppLocale()),
     width: 420,
     height: 340,
     resizable: false,
@@ -88,7 +95,7 @@ export function createShortcutsWindow(): void {
   }
 
   shortcutsWindow = new BrowserWindow({
-    title: SHORTCUTS_TITLE,
+    title: shortcutsTitle(getAppLocale()),
     width: 380,
     height: 440,
     resizable: false,

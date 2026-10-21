@@ -1,6 +1,8 @@
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { translate } from '@shared/i18n'
+import type { Locale } from '@shared/i18n'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -19,6 +21,15 @@ export const ICON_PATH = path.join(
 export const PRELOAD_PATH = path.join(__dirname, 'preload.mjs')
 
 export const APP_TITLE = 'Tocaê Reprodutor'
-export const ABOUT_TITLE = 'Sobre o Tocaê'
-export const SHORTCUTS_TITLE = 'Atalhos'
-export const DESKTOP_FILE_NAME = 'tocae-reprodutor.desktop'
+export const DESKTOP_FILE_NAME = process.env['FLATPAK_ID']
+  ? `${process.env['FLATPAK_ID']}.desktop`
+  : 'tocae-reprodutor.desktop'
+
+/** Títulos das janelas auxiliares, que dependem do idioma em uso. */
+export function aboutTitle(locale: Locale): string {
+  return translate(locale, 'window.about')
+}
+
+export function shortcutsTitle(locale: Locale): string {
+  return translate(locale, 'window.shortcuts')
+}

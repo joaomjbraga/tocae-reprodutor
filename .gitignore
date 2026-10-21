@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 dist-electron
 release
+
+# Flatpak
+builddir
+.flatpak-builder
+repo
+*.flatpak
+*.flatpakref
+

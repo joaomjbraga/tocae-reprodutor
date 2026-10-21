@@ -1,0 +1,116 @@
+.root {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trigger {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-toolbar);
+  font: inherit;
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast),
+    border-color var(--duration-fast),
+    transform var(--duration-fast);
+}
+
+.trigger:active {
+  transform: scale(0.96);
+}
+
+.trigger:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.trigger.open {
+  border-color: var(--accent-strong);
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+.code {
+  font-variant-numeric: tabular-nums;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1);
+  border: 1px solid var(--border-surface);
+  border-radius: var(--radius-md);
+  background: var(--bg-app);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+  animation: menu-enter var(--duration-enter) var(--ease-standard) both;
+}
+
+@keyframes menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 6px var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-body);
+  font: inherit;
+  font-size: var(--text-xs);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.item[aria-checked='true'] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.itemText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemHint {
+  color: var(--text-subtle);
+  font-size: var(--text-2xs);
+  font-weight: 400;
+}

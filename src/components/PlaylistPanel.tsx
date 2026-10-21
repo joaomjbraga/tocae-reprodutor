@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, DragEvent, KeyboardEvent } from 'react'
 import { GripVertical, ListVideo, Play, Trash2, X } from 'lucide-react'
+import type { MessageKey, TranslationParams } from '@shared/i18n'
+import { useI18n } from '../i18n'
 import styles from './PlaylistPanel.module.css'
 
 /** `--i` alimenta o atraso em cascata da animação de entrada das linhas. */
@@ -20,7 +22,7 @@ type PlaylistPanelProps = {
   onClear: () => void
   onClose: () => void
   onFilesSelected: (files: File[]) => void
-  onAnnounce: (message: string) => void
+  onAnnounce: (key: MessageKey, params?: TranslationParams) => void
 }
 
 function PlaylistPanel({
@@ -37,6 +39,7 @@ function PlaylistPanel({
   onFilesSelected,
   onAnnounce,
 }: PlaylistPanelProps) {
+  const { t } = useI18n()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [droppingFiles, setDroppingFiles] = useState(false)
@@ -132,13 +135,13 @@ function PlaylistPanel({
     event.preventDefault()
     onMove(index, target)
     setFocusIndex(target)
-    onAnnounce(`Movido para a posição ${target + 1} de ${items.length}.`)
+    onAnnounce('playlist.moved', { position: target + 1, total: items.length })
   }
 
   return (
     <aside
       className={`${styles.panel} ${closing ? styles.closing : ''} ${droppingFiles ? styles.dropping : ''}`}
-      aria-label="Lista de reprodução"
+      aria-label={t('playlist.label')}
       inert={closing ? true : undefined}
       onDragEnter={handleFileDragEnter}
       onDragOver={handleFileDragOver}
@@ -148,22 +151,22 @@ function PlaylistPanel({
       <header className={styles.header}>
         <h2 className={styles.title}>
           <ListVideo size={14} />
-          Lista
+          {t('playlist.title')}
           {items.length > 0 && <span className={styles.count}>{items.length}</span>}
         </h2>
         <button
           type="button"
           className={styles.iconButton}
           onClick={onClose}
-          aria-label="Ocultar lista"
-          title="Ocultar lista (L)"
+          aria-label={t('playlist.hide')}
+          title={t('playlist.hideTitle')}
         >
           <X size={14} />
         </button>
       </header>
 
       {loading ? (
-        <ul className={styles.skeleton} aria-label="Carregando lista" aria-busy="true">
+        <ul className={styles.skeleton} aria-label={t('playlist.loading')} aria-busy="true">
           {[0, 1, 2].map((slot) => (
             <li key={slot} className={styles.skeletonRow}>
               <span className={styles.skeletonBlock} />
@@ -173,7 +176,7 @@ function PlaylistPanel({
       ) : items.length === 0 ? (
         <p className={styles.empty}>
           <ListVideo size={28} className={styles.emptyIcon} aria-hidden="true" />
-          A lista está vazia. Abra vídeos para tocar em sequência.
+          {t('playlist.empty')}
         </p>
       ) : (
         <ol
@@ -215,7 +218,7 @@ function PlaylistPanel({
                   }}
                   onClick={() => onPlay(index)}
                   onKeyDown={(event) => handleItemKeyDown(event, index)}
-                  title={`${item.name} — Alt+↑ / Alt+↓ para mover`}
+                  title={t('playlist.itemTitle', { name: item.name })}
                   aria-current={isActive ? 'true' : undefined}
                 >
                   <span className={styles.handle} aria-hidden="true">
@@ -234,8 +237,8 @@ function PlaylistPanel({
                   type="button"
                   className={styles.remove}
                   onClick={() => onRemove(item.id)}
-                  aria-label={`Remover ${item.name} da lista`}
-                  title="Remover da lista"
+                  aria-label={t('playlist.remove', { name: item.name })}
+                  title={t('playlist.removeTitle')}
                 >
                   <Trash2 size={14} />
                 </button>
@@ -249,7 +252,7 @@ function PlaylistPanel({
         <footer className={styles.footer}>
           <button type="button" className={styles.clear} onClick={onClear}>
             <Trash2 size={14} />
-            Limpar lista
+            {t('playlist.clear')}
           </button>
         </footer>
       )}

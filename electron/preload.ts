@@ -1,7 +1,8 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type { IpcRendererEvent } from 'electron'
 import { IPC_CHANNELS } from '@shared/ipc'
-import type { AppCommand, TocaeApi, UpdateEvent, WindowTarget } from '@shared/ipc'
+import type { AppCommand, TocaeApi, WindowTarget } from '@shared/ipc'
+import type { Locale } from '@shared/i18n'
 import type { PlaylistItem } from '@shared/playlist'
 
 const api: TocaeApi = {
@@ -15,13 +16,8 @@ const api: TocaeApi = {
   openVideoDialog: () => ipcRenderer.invoke(IPC_CHANNELS.VIDEO_PICK),
   openWindow: (target: WindowTarget) => ipcRenderer.invoke(IPC_CHANNELS.WINDOW_OPEN, target),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
-  onUpdateEvent(callback) {
-    const listener = (_event: IpcRendererEvent, update: UpdateEvent) => callback(update)
-    ipcRenderer.on(IPC_CHANNELS.UPDATE_EVENT, listener)
-    return () => ipcRenderer.off(IPC_CHANNELS.UPDATE_EVENT, listener)
-  },
-  installUpdate: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_INSTALL),
-  checkForUpdate: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_CHECK),
+  getLocale: () => ipcRenderer.invoke(IPC_CHANNELS.LOCALE_GET),
+  setLocale: (locale: Locale | null) => ipcRenderer.invoke(IPC_CHANNELS.LOCALE_SET, locale),
 }
 
 contextBridge.exposeInMainWorld('tocae', api)

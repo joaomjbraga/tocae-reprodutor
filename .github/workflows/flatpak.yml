@@ -1,0 +1,65 @@
+name: Flatpak
+
+# O manifest do Flatpak é o mesmo que o Flathub usa. Construir aqui evita
+# descobrir manifesto quebrado só na hora da submissão.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Flatpak
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar flatpak e dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
+          flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub \
+            org.freedesktop.Sdk//26.08 \
+            org.freedesktop.Platform//26.08 \
+            org.freedesktop.Sdk.Extension.node24//26.08 \
+            org.electronjs.Electron2.BaseApp//26.08
+
+      - name: Construir
+        run: |
+          flatpak-builder \
+            --force-clean \
+            --install-deps-from=flathub \
+            --user \
+            --repo=repo \
+            build \
+            io.github.joaomjbraga.tocae-reprodutor.yaml
+
+      - name: Validar com o linter do Flathub
+        run: |
+          flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest \
+            io.github.joaomjbraga.tocae-reprodutor.yaml
+
+      - name: Instalar e rodar
+        run: |
+          flatpak-builder --user --install build io.github.joaomjbraga.tocae-reprodutor.yaml
+          flatpak run --command=echo io.github.joaomjbraga.tocae-reprodutor
+
+  check:
+    name: Typecheck e build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx vite build

@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PlaylistItem } from '@shared/playlist'
+import type { MessageKey } from '@shared/i18n'
 import { baseNameFor } from '../lib/format'
 import { isVideoFile, toMediaUrl } from '../lib/media'
 
-const UNRESOLVED_ERROR = 'Não foi possível localizar os arquivos arrastados.'
-const PLAYBACK_ERROR = 'Não foi possível reproduzir este vídeo.'
+// O erro é guardado como chave de tradução, não como texto pronto: assim o
+// idioma pode mudar sem que a mensagem exibida fique desatualizada.
+const UNRESOLVED_ERROR: MessageKey = 'error.unresolved'
+const PLAYBACK_ERROR: MessageKey = 'error.playback'
 
 interface PlaylistState {
   items: PlaylistItem[]
   currentIndex: number
-  error: string | null
+  error: MessageKey | null
   panelVisible: boolean
   loaded: boolean
   /** Ids duplicados recém-detectados, para o realce temporário das linhas. */

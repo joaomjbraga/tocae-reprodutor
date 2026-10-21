@@ -1,30 +1,45 @@
+import { useEffect } from 'react'
+import LanguageSwitcher from './LanguageSwitcher'
+import { useI18n } from '../i18n'
 import styles from './Shortcuts.module.css'
 import wordmark from '../assets/tocae-wordmark.png'
 
-const SHORTCUTS = [
-  { key: 'Ctrl+O', action: 'Abrir vídeos' },
-  { key: 'Espaço', action: 'Reproduzir ou pausar' },
-  { key: 'F', action: 'Entrar ou sair da tela cheia' },
-  { key: 'M', action: 'Silenciar ou ativar o som' },
-  { key: 'N', action: 'Próximo vídeo da lista' },
-  { key: 'P', action: 'Vídeo anterior da lista' },
-  { key: 'L', action: 'Mostrar ou ocultar a lista' },
-  { key: 'Alt+↑ / Alt+↓', action: 'Mover o item focado na lista' },
-]
-
 function Shortcuts() {
+  const { t } = useI18n()
+
+  // O título da janela vem do <title> do documento: mantê-lo em dia aqui faz
+  // a janela acompanhar o idioma sem depender do processo principal.
+  useEffect(() => {
+    document.title = t('window.shortcuts')
+  }, [t])
+
+  const shortcuts = [
+    { key: 'Ctrl+O', action: t('shortcuts.openVideos') },
+    { key: t('shortcuts.key.space'), action: t('shortcuts.playPause') },
+    { key: 'F', action: t('shortcuts.fullscreen') },
+    { key: 'M', action: t('shortcuts.mute') },
+    { key: 'N', action: t('shortcuts.next') },
+    { key: 'P', action: t('shortcuts.previous') },
+    { key: 'L', action: t('shortcuts.toggleList') },
+    { key: 'Alt+↑ / Alt+↓', action: t('shortcuts.move') },
+  ]
+
   return (
     <div className={styles.shortcuts}>
+      <div className={styles.corner}>
+        <LanguageSwitcher />
+      </div>
+
       <img
         className={styles.wordmark}
         src={wordmark}
         alt="Tocaê Reprodutor"
         draggable={false}
       />
-      <h1 className={styles.title}>Atalhos de teclado</h1>
+      <h1 className={styles.title}>{t('shortcuts.title')}</h1>
 
       <ul className={styles.list}>
-        {SHORTCUTS.map(({ key, action }) => (
+        {shortcuts.map(({ key, action }) => (
           <li key={action} className={styles.row}>
             <kbd className={styles.key}>{key}</kbd>
             <span className={styles.action}>{action}</span>

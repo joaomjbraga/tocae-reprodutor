@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ListVideo } from 'lucide-react'
+import type { MessageKey, TranslationParams } from '@shared/i18n'
 import AppBar from './AppBar'
 import PlaylistPanel from './PlaylistPanel'
 import Toast from './Toast'
-import UpdateBanner from './UpdateBanner'
 import VideoPlayer from './VideoPlayer'
 import { usePlaylist } from '../hooks/usePlaylist'
-import { useUpdate } from '../hooks/useUpdate'
 import type { PlaylistSnapshot } from '../hooks/usePlaylist'
+import { useI18n } from '../i18n'
 import styles from './PlayerScreen.module.css'
 
 /** Deve cobrir a saída animada do painel (--duration-exit) antes de desmontar. */
@@ -15,9 +15,12 @@ const PANEL_EXIT_MS = 160
 
 type ToastState = { message: string; snapshot: PlaylistSnapshot }
 
+/** Mensagem viva: guarda a chave para poder ser retraduzida na troca de idioma. */
+type Announcement = { key: MessageKey; params?: TranslationParams }
+
 function PlayerScreen() {
   const playlist = usePlaylist()
-  const update = useUpdate()
+  const { t } = useI18n()
   const api = window.tocae
   // O painel fica montado durante a saída para poder animar; `panelLeaving`
   // marca o estado intermediário.
@@ -25,18 +28,21 @@ function PlayerScreen() {
   const panelTimerRef = useRef<number | null>(null)
   // Uma única região viva para tudo que muda sozinho: item tocando, erro e
   // resultado de um reordenamento pelo teclado.
-  const [announcement, setAnnouncement] = useState('')
+  const [announcement, setAnnouncement] = useState<Announcement | null>(null)
   const [toast, setToast] = useState<ToastState | null>(null)
   const announcedIdRef = useRef<string | null>(null)
 
-  const announce = useCallback((message: string) => setAnnouncement(message), [])
+  const announce = useCallback(
+    (key: MessageKey, params?: TranslationParams) => setAnnouncement({ key, params }),
+    [],
+  )
 
   // "Limpar" passa pelo mesmo caminho vindo da barra, do painel ou do atalho do
   // processo principal, para que o desfazer exista nos três casos.
   const handleClear = useCallback(() => {
     const snapshot = playlist.clear()
-    if (snapshot) setToast({ message: 'Lista limpa', snapshot })
-  }, [playlist])
+    if (snapshot) setToast({ message: t('player.listCleared'), snapshot })
+  }, [playlist, t])
 
   const handleUndoClear = useCallback(() => {
     if (toast) playlist.restore(toast.snapshot)
@@ -96,12 +102,16 @@ function PlayerScreen() {
     }
     if (announcedIdRef.current === current.id) return
     announcedIdRef.current = current.id
-    setAnnouncement(`Tocando ${playlist.currentIndex + 1} de ${playlist.items.length}: ${current.name}`)
-  }, [playlist.current, playlist.currentIndex, playlist.items.length])
+    announce('player.nowPlaying', {
+      current: playlist.currentIndex + 1,
+      total: playlist.items.length,
+      name: current.name,
+    })
+  }, [announce, playlist.current, playlist.currentIndex, playlist.items.length])
 
   useEffect(() => {
-    if (playlist.error) setAnnouncement(playlist.error)
-  }, [playlist.error])
+    if (playlist.error) announce(playlist.error)
+  }, [announce, playlist.error])
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -136,6 +146,13 @@ function PlayerScreen() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [api, playlist])
 
+  const announcementText = useMemo(
+    () => (announcement ? t(announcement.key, announcement.params) : ''),
+    [announcement, t],
+  )
+
+  const errorMessage = playlist.error ? t(playlist.error) : null
+
   return (
     <div className={styles.screen}>
       <AppBar
@@ -151,11 +168,11 @@ function PlayerScreen() {
       <div className={styles.layout}>
         <div className={styles.stage}>
           <p className="sr-only" role="status" aria-live="polite">
-            {announcement}
+            {announcementText}
           </p>
           <VideoPlayer
             source={playlist.source}
-            message={playlist.error}
+            message={errorMessage}
             hasNext={playlist.hasNext}
             hasPrevious={playlist.hasPrevious}
             onNext={playlist.next}
@@ -169,17 +186,16 @@ function PlayerScreen() {
               type="button"
               className={styles.showList}
               onClick={playlist.togglePanel}
-              title="Mostrar lista (L)"
-              aria-label="Mostrar lista de reprodução"
+              title={t('player.showListTitle')}
+              aria-label={t('player.showList')}
             >
               <ListVideo size={16} />
             </button>
           )}
-          <UpdateBanner state={update.state} onInstall={update.install} onDismiss={update.dismiss} />
           {toast && (
             <Toast
               message={toast.message}
-              actionLabel="Desfazer"
+              actionLabel={t('player.undo')}
               onAction={handleUndoClear}
               onDismiss={() => setToast(null)}
             />

@@ -13,6 +13,7 @@ import {
   VolumeX,
 } from 'lucide-react'
 import { formatTime } from '../lib/format'
+import { useI18n } from '../i18n'
 import wordmark from '../assets/tocae-wordmark.png'
 import styles from './VideoPlayer.module.css'
 
@@ -45,6 +46,7 @@ function VideoPlayer({
   onFailed,
   onFilesSelected,
 }: VideoPlayerProps) {
+  const { t } = useI18n()
   const areaRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -269,15 +271,15 @@ function VideoPlayer({
             type="button"
             className={styles.playPause}
             onClick={togglePlay}
-            aria-label="Reproduzir"
-            title="Reproduzir"
+            aria-label={t('player.play')}
+            title={t('player.play')}
           >
             <Play size={24} />
           </button>
           {buffering && (
             <div className={styles.buffer} role="status" aria-live="polite">
               <Loader2 size={28} className={styles.spinner} />
-              <span className="sr-only">Carregando vídeo</span>
+              <span className="sr-only">{t('player.loadingVideo')}</span>
             </div>
           )}
           <div className={styles.controlsBar}>
@@ -285,8 +287,8 @@ function VideoPlayer({
               type="button"
               className={styles.controlButton}
               onClick={togglePlay}
-              aria-label={paused ? 'Reproduzir' : 'Pausar'}
-              title={paused ? 'Reproduzir' : 'Pausar'}
+              aria-label={paused ? t('player.play') : t('player.pause')}
+              title={paused ? t('player.play') : t('player.pause')}
             >
               {paused ? <Play size={16} /> : <Pause size={16} />}
             </button>
@@ -295,8 +297,8 @@ function VideoPlayer({
               className={styles.controlButton}
               onClick={onPrevious}
               disabled={!hasPrevious}
-              aria-label="Vídeo anterior"
-              title="Vídeo anterior (P)"
+              aria-label={t('player.previous')}
+              title={t('player.previousTitle')}
             >
               <SkipBack size={16} />
             </button>
@@ -305,8 +307,8 @@ function VideoPlayer({
               className={styles.controlButton}
               onClick={onNext}
               disabled={!hasNext}
-              aria-label="Próximo vídeo"
-              title="Próximo vídeo (N)"
+              aria-label={t('player.next')}
+              title={t('player.nextTitle')}
             >
               <SkipForward size={16} />
             </button>
@@ -323,8 +325,11 @@ function VideoPlayer({
               onPointerDown={() => setSeeking(true)}
               onPointerUp={() => setSeeking(false)}
               onPointerCancel={() => setSeeking(false)}
-              aria-label="Linha do tempo do vídeo"
-              aria-valuetext={`${formatTime(currentTime)} de ${formatTime(duration)}`}
+              aria-label={t('player.timeline')}
+              aria-valuetext={t('player.timelineValue', {
+                current: formatTime(currentTime),
+                total: formatTime(duration),
+              })}
             />
             <span className={styles.time}>{formatTime(duration)}</span>
             <div className={styles.volume}>
@@ -332,8 +337,8 @@ function VideoPlayer({
                 type="button"
                 className={styles.controlButton}
                 onClick={toggleMute}
-                aria-label={muted ? 'Ativar som' : 'Silenciar'}
-                title={muted ? 'Ativar som' : 'Silenciar'}
+                aria-label={muted ? t('player.unmute') : t('player.mute')}
+                title={muted ? t('player.unmute') : t('player.mute')}
               >
                 {volumeIcon}
               </button>
@@ -345,15 +350,15 @@ function VideoPlayer({
                 step={0.01}
                 value={muted ? 0 : volume}
                 onChange={handleVolumeChange}
-                aria-label="Volume"
+                aria-label={t('player.volume')}
               />
             </div>
             <button
               type="button"
               className={styles.controlButton}
               onClick={toggleFullscreen}
-              aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-              title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+              aria-label={isFullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
+              title={isFullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
             >
               {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
             </button>
@@ -375,7 +380,7 @@ function VideoPlayer({
             alt="Tocaê Reprodutor"
             draggable={false}
           />
-          <p>{message ?? 'Abra um vídeo ou arraste-o para aqui'}</p>
+          <p>{message ?? t('player.dropHint')}</p>
         </div>
       )}
 
