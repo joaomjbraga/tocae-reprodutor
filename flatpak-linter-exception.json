@@ -1,0 +1,8 @@
+{
+  "_comment": "Entradas a adicionar ao arquivo flatpak_builder_lint/staticfiles/exceptions.json do repositório flathub/flatpak-builder-lint. Envie como PR para https://github.com/flathub/flatpak-builder-lint.",
+  "io.github.joaomjbraga.tocae-reprodutor": {
+    "stable": {
+      "finish-args-host-ro-filesystem-access": "O app é um reprodutor de vídeo: lê os arquivos escolhidos pelo usuário pelo caminho real (protocolo media://) e nunca escreve fora do seu próprio diretório de dados."
+    }
+  }
+}

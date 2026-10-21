@@ -2,32 +2,48 @@
 
 Checklist para publicar o Tocaê Reprodutor no Flathub.
 
-## O que já está no repositório
+## Como funciona o empacotamento
 
-| Arquivo | Papel |
+O Flatpak do Flathub é montado a partir de **dois repositórios**:
+
+- **No Flathub** (`flathub/io.github.joaomjbraga.tocae-reprodutor`): o manifest,
+  os metadados e o manifesto de dependências do npm.
+- **No upstream** (`joaomjbraga/tocae-reprodutor`): o código do app, na tag da
+  versão. É dela que o manifest busca o fonte, com `type: git`.
+
+O manifest em `io.github.joaomjbraga.tocae-reprodutor.yaml` é o mesmo nos dois
+lugares: no upstream ele serve para build local, e copiado para o repositório
+do Flathub vira o manifest da submissão.
+
+## Arquivos da submissão
+
+Todos ficam na **raiz** do repositório do app no Flathub:
+
+| Arquivo | Origem |
 |---|---|
-| `io.github.joaomjbraga.tocae-reprodutor.yaml` | Manifest do Flatpak (nomeado com o app id, como o Flathub exige) |
-| `io.github.joaomjbraga.tocae-reprodutor.metainfo.xml` | Metadados AppStream (obrigatórios para o app aparecer no site) |
-| `data/io.github.joaomjbraga.tocae-reprodutor.desktop` | Desktop file exportado para `/app/share/applications` |
-| `generated-sources.json` | Dependências do npm como fontes offline (`flatpak-node-generator`) |
-| `screenshots/` | Capturas de tela referenciadas pelo metainfo |
-| `.github/workflows/flatpak.yml` | Constrói o Flatpak a cada push e PR |
+| `io.github.joaomjbraga.tocae-reprodutor.yaml` | manifest |
+| `io.github.joaomjbraga.tocae-reprodutor.metainfo.xml` | metadados AppStream |
+| `io.github.joaomjbraga.tocae-reprodutor.desktop` | desktop file |
+| `io.github.joaomjbraga.tocae-reprodutor.png` | ícone 256×256 |
+| `generated-sources.json` | dependências do npm como fontes offline |
+| `LICENSE` | licença |
+
+O conjunto completo já está em `~/flathub-submission/` e foi buildado a partir
+dali para confirmar que é autossuficiente.
 
 ## Antes de submeter
 
-1. **Publicar a tag `v0.0.3`.** As capturas de tela do metainfo apontam para
-   `raw.githubusercontent.com/.../v0.0.3/screenshots/...`. Sem a tag, os
-   screenshots não resolvem e o linter falha com `appstream-missing-screenshots`.
+1. **Publicar a tag.** O manifest aponta para `tag: v0.0.3` com o commit
+   fixado. Ao publicar uma versão nova, troque os dois campos e atualize o
+   `<release>` no metainfo.
 
    ```sh
-   git tag -a v0.0.3 -m "Português e inglês, empacotamento Flatpak"
-   git push --tags
+   git tag -a v0.0.4 -m "..." && git push origin v0.0.4
    ```
 
 2. **Atualizar a versão do Electron no manifest.** A URL e o `sha256` do zip
-   do Electron estão fixados em `io.github.joaomjbraga.tocae-reprodutor.yaml`.
-   Ao atualizar o Electron no `package.json`, troque os dois campos (e o nome
-   do zip em `electron-dist`).
+   do Electron estão fixados no manifest. Ao atualizar o Electron no
+   `package.json`, troque os dois campos (e o nome do zip em `electron-dist`).
 
 3. **Regerar as dependências do npm** depois de mexer no `package-lock.json`:
 
@@ -47,7 +63,7 @@ dados, então a permissão é somente de leitura.
 
 O linter do Flathub sinaliza `finish-args-host-ro-filesystem-access`. Ele é
 aprovado mediante justificativa, pedida num PR no repositório de exceções do
-linter:
+linter (`flathub/flatpak-builder-lint`, arquivo `exceptions.json`):
 
 ```json
 "io.github.joaomjbraga.tocae-reprodutor": {
@@ -71,11 +87,24 @@ flatpak run io.github.joaomjbraga.tocae-reprodutor
 
 ## Submissão
 
-1. Fork de `flathub/flathub`, branch `new-pr`.
-2. Adicionar o manifest, o metainfo, o desktop file, os ícones e a licença
-   na raiz do repositório do app.
-3. Abrir o PR contra a branch `new-pr`, com o título
-   `Add io.github.joaomjbraga.tocae-reprodutor`.
-4. Comentar `bot, build` para gerar o build de teste.
+```sh
+# 1. Fork e branch de submissão
+gh repo fork flathub/flathub --clone --remote=false
+git clone --branch=new-pr git@github.com:<seu-usuario>/flathub.git
+cd flathub && git checkout --track origin/new-pr
+
+# 2. Copiar os arquivos da submissão para a raiz
+cp ~/flathub-submission/* .
+
+# 3. Commit e push
+git add .
+git commit -m "Add io.github.joaomjbraga.tocae-reprodutor"
+git push origin new-pr
+
+# 4. Abrir o PR contra a branch new-pr
+gh pr create --base new-pr --title "Add io.github.joaomjbraga.tocae-reprodutor" --body "..."
+```
+
+Depois de mergear, comente `bot, build` no PR para gerar o build de teste.
 
 Detalhes: <https://docs.flathub.org/docs/for-app-authors/submission>
